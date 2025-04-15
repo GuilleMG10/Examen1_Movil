@@ -21,4 +21,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "examen1"
 include(":app")
- 
+include(":domain")
+include(":framework")
+include(":data")
+include(":usecase")
