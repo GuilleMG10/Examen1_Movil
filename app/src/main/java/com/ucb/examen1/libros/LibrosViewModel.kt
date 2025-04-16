@@ -9,10 +9,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.ucb.usecase.AFavoritos
 
 @HiltViewModel
 class LibrosViewModel @Inject constructor(
-    private val searchBooks: LibroBuscado
+    private val searchBooks: LibroBuscado,
+    private val aFavoritos: AFavoritos
 ) : ViewModel() {
 
     sealed class LibroState {
@@ -31,4 +33,10 @@ class LibrosViewModel @Inject constructor(
             _flow.value = LibroState.Successful(result)
         }
     }
+    fun anadirAFavoritos(libro: Libro) {
+        viewModelScope.launch {
+            aFavoritos.invoke(libro)
+        }
+    }
+
 }

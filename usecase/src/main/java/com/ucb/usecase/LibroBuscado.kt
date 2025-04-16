@@ -4,7 +4,7 @@ import com.ucb.domain.Libro
 import com.ucb.data.LibroRepository
 import kotlinx.coroutines.delay
 
-class LibroBuscado (
+class LibroBuscado constructor(
     val bookRepository: LibroRepository
 ) {
     suspend fun invoke(toSearch: String): List<Libro> {

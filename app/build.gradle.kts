@@ -76,6 +76,7 @@ dependencies {
     implementation("androidx.room:room-runtime:2.6.1")  // Última versión estable de Room
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
+    implementation ("androidx.compose.material:material-icons-extended:1.4.3")
     implementation(project(":domain"))
     implementation(project(":data"))
     implementation(project(":framework"))
