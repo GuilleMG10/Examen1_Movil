@@ -15,13 +15,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ucb.domain.Libro
 import com.ucb.examen1.libros.LibrosViewModel
-
 @Composable
 fun BuscarLibroUI2() {
     val viewModel: LibrosViewModel = hiltViewModel()
     var query by remember { mutableStateOf("") }
+    var mostrarFavoritos by remember { mutableStateOf(false) }
+    val librosfavs = remember { mutableStateListOf<Libro>() }
     val state by viewModel.flow.collectAsState()
-    val librosFav = remember { mutableStateListOf<Libro>() }
 
     Column(
         modifier = Modifier
@@ -46,23 +46,31 @@ fun BuscarLibroUI2() {
                 .padding(bottom = 12.dp)
         )
 
+        // Fila con los botones de "Buscar" y "Ver Favoritos"
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Button(
-                onClick = { /* Acción para volver */ },
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Text("← Volver")
-            }
-
-            Button(
-                onClick = { viewModel.search(query) },
+                onClick = {
+                    viewModel.search(query) // Acción para realizar la búsqueda
+                    mostrarFavoritos = false // Cambiar a búsqueda
+                },
                 enabled = query.isNotBlank(),
                 shape = MaterialTheme.shapes.medium
             ) {
                 Text("Buscar")
+            }
+
+            // Botón para ver favoritos
+            Button(
+                onClick = {
+                    viewModel.verFavoritos() // Acción para mostrar los favoritos
+                    mostrarFavoritos = true // Cambiar a favoritos
+                },
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text("Ver Favoritos")
             }
         }
 
@@ -85,42 +93,58 @@ fun BuscarLibroUI2() {
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(current.libros) { libro ->
-                        ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    text = "📚 ${libro.titulo}",
-                                    style = MaterialTheme.typography.titleLarge
-                                )
-                                Text(
-                                    text = "Año de publicación: ${libro.AnioPub}",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                                Text(
-                                    text = "Autor(es): ${libro.autor.joinToString()}",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
 
-                            IconButton(
-                                onClick = {
-                                    if (librosFav.contains(libro)) {
-                                        librosFav.remove(libro)
+                    val librosAMostrar = if (mostrarFavoritos) {
+                        current.libros.filter { it.favorito }
+                    } else {
+                        current.libros
+                    }
+
+                    items(current.libros) { libro ->
+                        ElevatedCard(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "📚 ${libro.titulo}",
+                                        style = MaterialTheme.typography.titleLarge
+                                    )
+                                    Text(
+                                        text = "Año de publicación: ${libro.AnioPub}",
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                    Text(
+                                        text = "Autor(es): ${libro.autor.joinToString()}",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+
+                                val isFavorite = librosfavs.contains(libro)
+
+                                IconButton(onClick = {
+                                    if (isFavorite) {
+                                        librosfavs.remove(libro)
                                     } else {
-                                        librosFav.add(libro)
+                                        librosfavs.add(libro)
                                         viewModel.anadirAFavoritos(libro)
                                     }
+                                }) {
+                                    Icon(
+                                        imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                        contentDescription = if (isFavorite) "Remover de favoritos" else "Agregar a favoritos"
+                                    )
                                 }
-                            ) {
-                                Icon(
-                                    imageVector = if (librosFav.contains(libro)) Icons.Default.Star else Icons.Default.StarOutline,
-                                    contentDescription = if (librosFav.contains(libro)) "Quitar de destacados" else "Marcar como destacado"
-                                )
-
-
                             }
                         }
                     }
+
                 }
             }
         }

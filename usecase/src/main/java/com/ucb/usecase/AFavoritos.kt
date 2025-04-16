@@ -10,4 +10,7 @@ class AFavoritos (
         suspend fun invoke(libro: Libro) {
             libroRepository.guardarLibro(libro)
         }
+        suspend fun obtenerFavoritos(): List<Libro> {
+            return libroRepository.obtenerLibrosFavoritos()
+        }
     }

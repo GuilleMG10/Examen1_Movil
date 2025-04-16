@@ -16,4 +16,7 @@ class LibroRepository (
         libroLocalDataSource.guardarLibro(libro)
         return true
     }
+    suspend fun obtenerLibrosFavoritos(): List<Libro> {
+        return libroLocalDataSource.obtenerFavoritos()
+    }
 }

@@ -19,16 +19,20 @@ fun LibroResponseDto.toModel(): List<Libro> {
 
 fun Libro.toEntity(): LibroEntity {
     return LibroEntity(
+        id = this.id,
         title = this.titulo,
-        authors = this.autor.joinToString(),
-        publicationYear = this.AnioPub
+        authors = this.autor.joinToString(", "),
+        publicationYear = this.AnioPub,
+        favorito = this.favorito
     )
 }
 
 fun LibroEntity.toDomain(): Libro {
     return Libro(
+        id = this.id,
         titulo = this.title,
-        autor = this.authors.split(",").map { it.trim() },
-        AnioPub = this.publicationYear
+        AnioPub = this.publicationYear,
+        autor = this.authors.split(", "), // Suponemos que los autores están separados por comas
+        favorito = this.favorito // Mapeamos la propiedad 'favorito'
     )
 }

@@ -38,5 +38,12 @@ class LibrosViewModel @Inject constructor(
             aFavoritos.invoke(libro)
         }
     }
+    fun verFavoritos() {
+        viewModelScope.launch {
+            _flow.value = LibroState.Loading
+            val favoritos = aFavoritos.obtenerFavoritos()
+            _flow.value = LibroState.Successful(favoritos)
+        }
+    }
 
 }

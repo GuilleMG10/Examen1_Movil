@@ -10,5 +10,6 @@ data class LibroEntity(
     val id: Int = 0,
     val title: String,
     val authors: String,
-    val publicationYear: String
+    val publicationYear: String,
+    val favorito: Boolean = false
 )
