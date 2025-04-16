@@ -1,35 +1,44 @@
-package com.ucb.examen1.libros
-
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.ucb.examen1.libros.LibrosViewModel
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.ui.Alignment
+
 
 @Composable
-fun BuscarLibroUI() {
-
-    val viewModel: LibrosViewModel = viewModel()
+fun BuscarLibroUI2() {
+    val viewModel: LibrosViewModel = hiltViewModel()
     var query by remember { mutableStateOf("") }
-    val results by viewModel.buscado.collectAsState()
+    val state by viewModel.flow.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+            .padding(horizontal = 24.dp, vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(48.dp))
         Text(
-            text = " Buscar Libros",
+            text = "🔍 Buscar Libro",
             style = MaterialTheme.typography.headlineSmall,
-            textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
@@ -38,23 +47,24 @@ fun BuscarLibroUI() {
             onValueChange = { query = it },
             label = { Text("Nombre del libro") },
             modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .padding(vertical = 8.dp)
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
         )
 
         Row(
-            modifier = Modifier.fillMaxWidth(0.9f),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Button(
-                onClick = {  },
+                onClick = { /* Acción para volver */ },
                 shape = MaterialTheme.shapes.medium
             ) {
-                Text("Atrás")
+                Text("← Volver")
             }
 
             Button(
-                onClick = { viewModel.buscarLibros(query) },
+                onClick = { viewModel.search(query) },
+                enabled = query.isNotBlank(),
                 shape = MaterialTheme.shapes.medium
             ) {
                 Text("Buscar")
@@ -63,39 +73,43 @@ fun BuscarLibroUI() {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        if (results.isNotEmpty()) {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxWidth(0.95f)
-            ) {
-                items(results) { libro ->
-                    ElevatedCard(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = libro.titulo,
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                            Text(
-                                text = "Año: ${libro.AnioPub}",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Text(
-                                text = "Autores: ${libro.autor.joinToString()}",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
+        // Mostrar resultado según el estado
+        when (val current = state) {
+            is LibrosViewModel.LibroState.Init -> {
+                Text("Ingresa un término de búsqueda para comenzar.", style = MaterialTheme.typography.bodyMedium)
+            }
+
+            is LibrosViewModel.LibroState.Loading -> {
+                CircularProgressIndicator()
+            }
+
+            is LibrosViewModel.LibroState.Successful -> {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(current.libros) { libro ->
+                        ElevatedCard(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = "📚 ${libro.titulo}",
+                                    style = MaterialTheme.typography.titleLarge
+                                )
+                                Text(
+                                    text = "Año de publicación: ${libro.AnioPub}",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Text(
+                                    text = "Autor(es): ${libro.autor.joinToString()}",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
                         }
                     }
                 }
             }
-        } else {
-            Text(
-                text = "No hay resultados todavía",
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 16.dp)
-            )
         }
     }
 }
